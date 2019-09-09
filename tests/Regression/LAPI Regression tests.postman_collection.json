@@ -1,0 +1,458 @@
+{
+	"info": {
+		"_postman_id": "8d3b6f69-2e3a-4d08-a52c-0d0859e3e29b",
+		"name": "LAPI Regression tests",
+		"description": "Tests to check for regressions in core functionality",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Init",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "543dfe12-2bdd-4328-9f98-eeb010e02732",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/config/init",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"config",
+						"init"
+					]
+				},
+				"description": "Nukes the test database"
+			},
+			"response": []
+		},
+		{
+			"name": "Test Empty Get",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "76feedfd-2796-484f-9996-3226814e34cb",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"resonse is correct length\", function() {",
+							"    pm.expect(pm.response.json()).to.have.length(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/Person",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"Person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get CSRF token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2cb6e248-a6e5-48e3-9d4d-cad0c458bef4",
+						"exec": [
+							"pm.environment.set(\"csrf-token\", decodeURIComponent(pm.cookies.get(\"X-CSRF\")))"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/lapi",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"lapi"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0087b640-99c2-4ac2-b2fb-7622588abbdb",
+						"exec": [
+							"x = pm.variables.get(\"csrf-token\");",
+							"console.log(x)",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response has correct contents\", function() {",
+							"    pm.expect(pm.response.json().first_name).to.equal(\"Toby\");",
+							"    pm.expect(pm.response.json().last_name).to.equal(\"Such\");",
+							"    pm.expect(pm.response.json().age).to.equal(20);",
+							"})",
+							"",
+							"pm.globals.set(\"_id\", pm.response.json()._id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-CSRFTOKEN",
+						"value": "{{csrf-token}} ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"first_name\": \"Toby\",\n\t\"last_name\": \"Such\",\n\t\"age\": 20\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/api/Person",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"Person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Get",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "76bc0726-dcb1-40a7-9009-d99fb84e7d27",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"resonse is correct length\", function() {",
+							"    pm.expect(pm.response.json()).to.have.length(1);",
+							"});",
+							"",
+							"pm.test(\"response has the correct contents\", function() {",
+							"    pm.expect(pm.response.json()[0].first_name).to.equal(\"Toby\");",
+							"    pm.expect(pm.response.json()[0].last_name).to.equal(\"Such\");",
+							"    pm.expect(pm.response.json()[0].age).to.equal(20);",
+							"    pm.expect(pm.response.json()[0]._id).to.equal(pm.globals.get(\"_id\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/Person",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"Person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Show",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7b0e19de-d1be-4b2f-82b0-170d0adfb3ef",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response has the correct contents\", function() {",
+							"    pm.expect(pm.response.json().first_name).to.equal(\"Toby\");",
+							"    pm.expect(pm.response.json().last_name).to.equal(\"Such\");",
+							"    pm.expect(pm.response.json().age).to.equal(20);",
+							"    pm.expect(pm.response.json()._id).to.equal(pm.globals.get(\"_id\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/Person/{{_id}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"Person",
+						"{{_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Put",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0a1457ff-f4d7-4e63-94e6-1f3e4965f25e",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response has the correct contents\", function() {",
+							"    pm.expect(pm.response.json().first_name).to.equal(\"James\");",
+							"    pm.expect(pm.response.json().last_name).to.equal(\"Such\");",
+							"    pm.expect(pm.response.json().age).to.equal(20);",
+							"    pm.expect(pm.response.json()._id).to.equal(pm.globals.get(\"_id\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-CSRFTOKEN",
+						"value": "{{csrf-token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"first_name\": \"James\"\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/api/Person/{{_id}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"Person",
+						"{{_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8be398cf-52f9-48f7-a647-81da90654cfb",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-CSRFTOKEN",
+						"value": "{{csrf-token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:5000/api/Person/{{_id}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"Person",
+						"{{_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Get After Delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "77717e53-5055-4335-b34b-28ff46dd3dfe",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"resonse is correct length\", function() {",
+							"    pm.expect(pm.response.json()).to.have.length(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/Person",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"Person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test get_types",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e18936a9-f7de-4c94-b40f-b35be491ab4b",
+						"exec": [
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"resonse is correct length\", function() {",
+							"    pm.expect(pm.response.json()).to.have.length(1);",
+							"});",
+							"",
+							"pm.test(\"response has correct content\", function() {",
+							"    pm.expect(pm.response.json()[0]).is.equal(\"Person\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/get_types",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"get_types"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "bd19d03b-8c13-4ac4-a83c-2f3b5e9c8450",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "d07ef4f0-2ac7-424b-bc1b-01ca71085545",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
